@@ -1,0 +1,65 @@
+﻿<div class="container">
+    <div class="row">
+        <div class="col-6">
+            Calls: @Calls (Fetched @TotalItemsFetched items)
+            <button class="btn btn-sm btn-primary"
+                    @onclick="() => Reset()">
+                Reset
+            </button>
+        </div>
+        <div class="col-6">
+            Enter search text: <input @bind-value="Text" @bind-value:event="oninput" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            @FoodItems.Length item(s).
+        </div>
+        <div class="col-6">
+            @if (FoodItems.Length < 1)
+            {
+                <p>No items found.</p>
+            }
+            else
+            {
+                foreach (var foodItem in FoodItems)
+                {
+                    <p @key="foodItem.Id">@foodItem.Description</p>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string text;
+
+    [Parameter]
+    public int Calls { get; set; }
+
+    [Parameter]
+    public int TotalItemsFetched { get; set; }
+
+    [Parameter]
+    public Action Reset { get; set; }
+
+    [Parameter]
+    public string Text
+    {
+        get => text;
+        set
+        {
+            if (value != text)
+            {
+                text = value;
+                InvokeAsync(async () => await TextChanged.InvokeAsync(text));
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> TextChanged { get; set; }
+
+    [Parameter]
+    public FoodItem[] FoodItems { get; set; }
+} 

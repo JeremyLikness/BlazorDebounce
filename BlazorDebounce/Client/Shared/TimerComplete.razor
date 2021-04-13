@@ -1,0 +1,73 @@
+﻿@inject HttpClient Http
+
+@using System.Timers;
+
+<CompletionTemplate Calls="@calls"
+                    TotalItemsFetched="@totalItems"
+                    Reset="() => Reset()"
+                    @bind-Text="@Text"
+                    FoodItems="@foodItems" />
+
+@code {
+    private Timer timer = null;
+    private string text;
+    private FoodItem[] foodItems = new FoodItem[0];
+    private int calls;
+    private int totalItems;
+
+    private string Text
+    {
+        get => text;
+        set
+        {
+            if (value != text)
+            {
+                text = value;
+                DisposeTimer();
+                timer = new Timer(300);
+                timer.Elapsed += TimerElapsed_TickAsync;
+                timer.Enabled = true;
+                timer.Start();
+            }
+        }
+    }
+
+    private async void TimerElapsed_TickAsync(object sender, EventArgs e)
+    {
+        DisposeTimer();
+        await OnSearchAsync();
+    }
+
+    private void DisposeTimer()
+    {
+        if (timer != null)
+        {
+            timer.Enabled = false;
+            timer.Elapsed -= TimerElapsed_TickAsync;
+            timer.Dispose();
+            timer = null;
+        }
+    }
+
+    private void Reset()
+    {
+        calls = 0;
+        totalItems = 0;
+        DisposeTimer();
+        text = string.Empty;
+        foodItems = new FoodItem[0];
+        StateHasChanged();
+    }
+
+    private async Task OnSearchAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            foodItems = await Http.GetFromJsonAsync<FoodItem[]>(
+                $"/api/foods?text={text}");
+            calls++;
+            totalItems += foodItems.Length;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

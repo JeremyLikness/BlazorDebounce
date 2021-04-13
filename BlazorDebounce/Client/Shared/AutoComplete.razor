@@ -1,0 +1,48 @@
+﻿@inject HttpClient Http
+
+<CompletionTemplate Calls="@calls"
+                    TotalItemsFetched="@totalItems"
+                    Reset="() => Reset()"
+                    @bind-Text="@Text"
+                    FoodItems="@foodItems" />
+
+@code {
+    private string text;
+    private FoodItem[] foodItems = new FoodItem[0];
+    private int calls;
+    private int totalItems;
+
+    private string Text
+    {
+        get => text;
+        set
+        {
+            if (value != text)
+            {
+                text = value;
+                InvokeAsync(OnSearchAsync);
+            }
+        }
+    }
+
+    private void Reset()
+    {
+        calls = 0;
+        totalItems = 0;
+        text = string.Empty;
+        foodItems = new FoodItem[0];
+        StateHasChanged();
+    }
+
+    private async Task OnSearchAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            foodItems = await Http.GetFromJsonAsync<FoodItem[]>(
+                $"/api/foods?text={text}");
+            calls++;
+            totalItems += foodItems.Length;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

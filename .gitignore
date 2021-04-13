@@ -1,0 +1,27 @@
+# Ignore these files
+
+# Visual Studio options folder
+.vs/
+
+# Build objects
+obj/
+
+# Packages
+packages/
+
+# Build assets
+bin/
+
+# User settings
+*.user
+
+# Test results
+TestResults/
+TestDocResults/
+
+# Logs
+log.txt
+debug.log
+
+# Publishing
+PublishProfiles/
